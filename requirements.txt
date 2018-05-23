@@ -1,0 +1,11 @@
+torch>=0.3.1
+torchvision>=0.2.0
+plotly>=2.2.3
+visdom>=0.1.7
+psutil>=5.4.1
+scikit-image>=0.13.1
+scoop>=0.7
+graphviz>2.40.1
+matplotlib>=2.1.2
+scikit-learn>=0.19.1
+seaborn>=0.8.1

@@ -7,7 +7,7 @@ import torch
 class Checkpoints:
     def __init__(self, args):
         self.dir_save = args.save
-        self.file_load = args.resume
+        self.file_load = args.bp_resume
 
         if os.path.isdir(self.dir_save) is False:
             os.makedirs(self.dir_save)

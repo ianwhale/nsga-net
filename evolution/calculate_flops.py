@@ -1,5 +1,7 @@
 import torch
 
+# Original implementation:
+# 	https://github.com/warmspringwinds/pytorch-segmentation-detection/blob/master/pytorch_segmentation_detection/utils/flops_benchmark.py
 
 # ---- Public functions
 

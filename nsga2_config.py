@@ -39,7 +39,7 @@ def parse_args():
                         help='Whether or not to check for early termination')
     parser.add_argument('--term-threshold', type=float, default=0.05,
                         help='Whether or not to check for early termination')
-    parser.add_argument('--eval-method', type=int, default=0,
+    parser.add_argument('--eval-method', type=int, default=2,
                         help='0: non-cluster, 1: cluster, 2: dummy')
 
     # ======================= EDNN related Parameters =====================================
@@ -56,7 +56,7 @@ def parse_args():
     parser.add_argument('--dataroot', type=str, default='../', help='path to the data')
     parser.add_argument('--save', type=str, default=result_path +'Save', help='save the trained models here')
     parser.add_argument('--logs', type=str, default=result_path +'Logs', help='save the training log files here')
-    parser.add_argument('--bp_arresume', type=bool, default=False, help='full path of models to resume training')
+    parser.add_argument('--bp_resume', type=bool, default=False, help='full path of models to resume training')
     parser.add_argument('--nclasses', type=int, default=10, help='number of classes for classification')
     parser.add_argument('--input-filename-test', type=str, default=None, help='input test filename for filelist and folderlist')
     parser.add_argument('--label-filename-test', type=str, default=None, help='label test filename for filelist and folderlist')

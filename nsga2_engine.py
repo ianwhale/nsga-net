@@ -113,7 +113,7 @@ class Engine:
 
         return [resnet_string, densenet_string, vgg_string]
 
-    def report_config_to_file(self, nsga2_config, pytorchnet_config):
+    def report_config_to_file(self, nsga2_config):
         dir_name = "Results"
         if os.path.exists(dir_name):
             pass
@@ -141,11 +141,11 @@ class Engine:
             print("Num phases = {}, num nodes = {}".format(self.n_phases, self.n_nodes),
                   file=text_file)
             print("Dataset = {}, seed = {}, num filters = {}, batch size = {}, num epochs = {}"
-                  .format(pytorchnet_config.dataset_train, pytorchnet_config.manual_seed,
-                          pytorchnet_config.nfilters, pytorchnet_config.batch_size,
-                          pytorchnet_config.nepochs), file=text_file)
-            print("Train = {}, lr = {}".format(pytorchnet_config.optim_method,
-                                               pytorchnet_config.learning_rate),
+                  .format(nsga2_config.dataset_train, nsga2_config.manual_seed,
+                          nsga2_config.nfilters, nsga2_config.batch_size,
+                          nsga2_config.nepochs), file=text_file)
+            print("Train = {}, lr = {}".format(nsga2_config.optim_method,
+                                               nsga2_config.learning_rate),
                   file=text_file)
 
         return

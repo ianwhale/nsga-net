@@ -8,14 +8,14 @@ the selection is based on the 'dominance' check. Rank information is
 considered obsolete here
 """
 # NSGA2 main script
-import config
+# import config
 import numpy as np
 import nsga2_config
 import nsga2_engine
 
 def Main():
     args = nsga2_config.parse_args()
-    args_pytorchnet = config.parser.parse_args()
+    # args_pytorchnet = config.parser.parse_args()
 
     run = args.run  # current run id
     np.random.seed(args.seed)
@@ -26,7 +26,7 @@ def Main():
     nsga2 = nsga2_engine.Engine(args, run)
 
     # write configuration to file
-    nsga2.report_config_to_file(args, args_pytorchnet)
+    nsga2.report_config_to_file(args, args)
 
     # ============================ INITIALIZATION =============================== #
     # if resume from previous generation
@@ -41,7 +41,7 @@ def Main():
         pop, config_archive = nsga2.initialization()
         init_gen = 0
         # evaluate initial population
-        nsga2.assign_fitness(pop, args_pytorchnet)
+        nsga2.assign_fitness(pop, args)
         nsga2.assign_rank_crowding_distance(pop)
         pop_archive = nsga2.update_pop_archive(pop, [])
         # record initial statistics
@@ -59,7 +59,7 @@ def Main():
         child_pop, config_archive = nsga2.prepare_pop_for_evaluation(gen, child_pop,
                                                                      config_archive, pop_archive)
         child_pop, pop_archive = nsga2.compute_fitness_pop(child_pop, pop_archive,
-                                                           args_pytorchnet)
+                                                           args)
         mixed_pop = pop + child_pop
         pop = nsga2.fill_nondominated_sort(mixed_pop)
         # calculate offspring survival rate
@@ -93,7 +93,7 @@ def Main():
         child_pop, config_archive = nsga2.prepare_pop_for_evaluation(gen, [], config_archive,
                                                                      pop_archive, True)
         child_pop, pop_archive = nsga2.compute_fitness_pop(child_pop, pop_archive,
-                                                           args_pytorchnet)
+                                                           args)
         mixed_pop = pop + child_pop
         pop = nsga2.fill_nondominated_sort(mixed_pop)
         pop = nsga2.report_gen_to_file(run, gen, pop, child_pop, config_archive, pop_archive)

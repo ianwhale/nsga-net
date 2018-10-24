@@ -1,7 +1,0 @@
-NSGA2 related:
-Seed = 10, pop size = 10, max gens = 20, resume = False, prior = False
-Crx prob = 1.0, mut prob = 0.0, termination = False
-Pytorch related:
-Num phases = 3, num nodes = 6
-Dataset = MYCIFAR10, seed = 0, num filters = 64, batch size = 64, num epochs = 25
-Train = SGD, lr = 0.025

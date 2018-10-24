@@ -26,7 +26,7 @@ def Main():
     nsga2 = nsga2_engine.Engine(args, run)
 
     # write configuration to file
-    nsga2.report_config_to_file(args, args)
+    nsga2.report_config_to_file(args)
 
     # ============================ INITIALIZATION =============================== #
     # if resume from previous generation

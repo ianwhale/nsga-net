@@ -5,25 +5,26 @@ import torch.nn as nn
 from evolution import ResidualGenomeDecoder, VariableGenomeDecoder, DenseGenomeDecoder
 
 
-def get_decoder(decoder_str, genome, channels):
+def get_decoder(decoder_str, genome, channels, repeats=None):
     """
     Construct the appropriate decoder.
     :param decoder_str: string, refers to what genome scheme we're using.
     :param genome: list, list of genomes.
     :param channels: list, list of channel sizes.
+    :param repeats: None | list, how many times to repeat each phase.
     :return: evolution.ChannelBasedDecoder
     """
     if decoder_str == "residual":
-        return ResidualGenomeDecoder(genome, channels)
+        return ResidualGenomeDecoder(genome, channels, repeats=repeats)
 
     if decoder_str == "swapped-residual":
-        return ResidualGenomeDecoder(genome, channels, preact=True)
+        return ResidualGenomeDecoder(genome, channels, preact=True, repeats=repeats)
 
     if decoder_str == "dense":
-        return DenseGenomeDecoder(genome, channels)
+        return DenseGenomeDecoder(genome, channels, repeats=repeats)
 
     if decoder_str == "variable":
-        return VariableGenomeDecoder(genome, channels)
+        return VariableGenomeDecoder(genome, channels, repeats=repeats)
 
     raise NotImplementedError("Decoder {} not implemented.".format(decoder_str))
 
@@ -33,7 +34,7 @@ class EvoNetwork(nn.Module):
     Entire network.
     Made up of Phases.
     """
-    def __init__(self, genome, channels, out_features, data_shape, decoder="residual"):
+    def __init__(self, genome, channels, out_features, data_shape, decoder="residual", repeats=None):
         """
         Network constructor.
         :param genome: depends on decoder scheme, for most this is a list.
@@ -44,8 +45,10 @@ class EvoNetwork(nn.Module):
         super(EvoNetwork, self).__init__()
 
         assert len(channels) == len(genome), "Need to supply as many channel tuples as genes."
+        if repeats is not None:
+            assert len(repeats) == len(genome), "Need to supply repetition information for each phase."
 
-        self.model = get_decoder(decoder, genome, channels).get_model()
+        self.model = get_decoder(decoder, genome, channels, repeats).get_model()
 
         #
         # After the evolved part of the network, we would like to do global average pooling and a linear layer.

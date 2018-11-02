@@ -2,6 +2,7 @@
 
 import torch
 import torch.nn as nn
+from copy import copy
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 
@@ -28,7 +29,13 @@ class ChannelBasedDecoder(Decoder):
     Channel based decoder that deals with encapsulating constructor logic.
     """
 
-    def __init__(self, list_genome, channels):
+    def __init__(self, list_genome, channels, repeats=None):
+        """
+        Constructor.
+        :param list_genome: list, genome describing the connections in a network.
+        :param channels: list, list of tuples describing the channel size changes.
+        :param repeats: None | list, list of integers describing how many times to repeat each phase.
+        """
         super().__init__(list_genome)
 
         self._model = None
@@ -37,12 +44,50 @@ class ChannelBasedDecoder(Decoder):
         self._genome = self.get_effective_genome(list_genome)
         self._channels = channels[:len(self._genome)]
 
+        # Use the provided repeats list, or a list of all ones (only repeat each phase once).
+        if repeats is not None:
+            # First select only the repeats that are active in the list_genome.
+            active_repeats = []
+            for idx, gene in enumerate(list_genome):
+                if phase_active(gene):
+                    active_repeats.append(repeats[idx])
+
+            self.adjust_for_repeats(active_repeats)
+        else:
+            # Each phase only repeated once.
+            self._repeats = [1 for _ in self._genome]
+
         # If we had no active nodes, our model is just the identity, and we stop constructing.
         if not self._genome:
             self._model = Identity()
 
-    @staticmethod
-    def build_layers(phases):
+        print(list_genome)
+
+    def adjust_for_repeats(self, repeats):
+        """
+        Adjust for repetition of phases.
+        :param repeats:
+        """
+        self._repeats = repeats
+
+        # Adjust channels and genome to agree with repeats.
+        repeated_genome = []
+        repeated_channels = []
+        for i, repeat in enumerate(self._repeats):
+            for j in range(repeat):
+                if j == 0:
+                    # This is the first instance of this repeat, we need to use the (in, out) channel convention.
+                    repeated_channels.append((self._channels[i][0], self._channels[i][1]))
+                else:
+                    # This is not the first instance, use the (out, out) convention.
+                    repeated_channels.append((self._channels[i][1], self._channels[i][1]))
+
+                repeated_genome.append(self._genome[i])
+
+        self._genome = repeated_genome
+        self._channels = repeated_channels
+
+    def build_layers(self, phases):
         """
         Build up the layers with transitions.
         :param phases: list of phases
@@ -50,8 +95,9 @@ class ChannelBasedDecoder(Decoder):
         """
         layers = []
         last_phase = phases.pop()
-        for phase in phases:
-            layers.append(phase)
+        for phase, repeat in zip(phases, self._repeats):
+            for _ in range(repeat):
+                layers.append(phase)
             layers.append(nn.MaxPool2d(kernel_size=2, stride=2))  # TODO: Generalize this, or consider a new genome.
 
         layers.append(last_phase)
@@ -534,13 +580,14 @@ class ResidualGenomeDecoder(ChannelBasedDecoder):
     Genetic CNN genome decoder with residual bit.
     """
 
-    def __init__(self, list_genome, channels, preact=False):
+    def __init__(self, list_genome, channels, preact=False, repeats=None):
         """
         Constructor.
         :param list_genome: list, genome describing the connections in a network.
         :param channels: list, list of tuples describing the channel size changes.
+        :param repeats: None | list, list of integers describing how many times to repeat each phase.
         """
-        super().__init__(list_genome, channels)
+        super().__init__(list_genome, channels, repeats=repeats)
 
         if self._model is not None:
             return  # Exit if the parent constructor set the model.
@@ -598,7 +645,6 @@ class ResidualPhase(nn.Module):
         # At this point, we know which nodes will be receiving input from where.
         # So, we build the 1x1 convolutions that will deal with the depth-wise concatenations.
         #
-
         conv1x1s = [Identity()] + [Identity() for _ in range(max(self.dependency_graph.keys()))]
         for node_idx, dependencies in self.dependency_graph.items():
             if len(dependencies) > 1:
@@ -765,21 +811,23 @@ class VariableGenomeDecoder(ChannelBasedDecoder):
     PREACT_RESIDUAL = 1
     DENSE = 2
 
-    def __init__(self, list_genome, channels):
+    def __init__(self, list_genome, channels, repeats=None):
         """
         Constructor.
         :param list_genome: list, genome describing the connections in a network, and the type of phase.
         :param channels: list, list of tuples describing the channel size changes.
+        :param repeats: None | list, list of integers describing how many times to repeat each phase.
         """
         phase_types = [gene.pop() for gene in list_genome]
+        genome_copy = copy(list_genome)  # We can't guarantee the genome won't be changed in the parent constructor.
 
-        super().__init__(list_genome, channels)
+        super().__init__(list_genome, channels, repeats=repeats)
 
         if self._model is not None:
             return  # Exit if the parent constructor set the model.
 
-        self._genome, self._types = self.get_effective_phases(list_genome, phase_types)
-        self._channels = channels[:len(self._genome)]
+        # Adjust the types for repeats and inactive phases.
+        self._types = self.adjust_types(genome_copy, phase_types)
 
         phases = []
         for idx, (gene, (in_channels, out_channels), phase_type) in enumerate(zip(self._genome,
@@ -799,8 +847,7 @@ class VariableGenomeDecoder(ChannelBasedDecoder):
 
         self._model = nn.Sequential(*self.build_layers(phases))
 
-    @staticmethod
-    def get_effective_phases(genome, phase_types):
+    def adjust_types(self, genome, phase_types):
         """
         Get only the phases that are active.
         Similar to ResidualDecoder.get_effective_genome but we need to consider phases too.
@@ -808,15 +855,14 @@ class VariableGenomeDecoder(ChannelBasedDecoder):
         :param phase_types: list,
         :return:
         """
-        effecive_genome = []
         effective_types = []
 
-        for gene, phase_type in zip(genome, phase_types):
+        for idx, (gene, phase_type) in enumerate(zip(genome, phase_types)):
             if phase_active(gene):
-                effecive_genome.append(gene)
-                effective_types.append(*phase_type)
+                for _ in range(self._repeats[idx]):
+                    effective_types.append(*phase_type)
 
-        return effecive_genome, effective_types
+        return effective_types
 
     def get_model(self):
         return self._model
@@ -826,14 +872,14 @@ class DenseGenomeDecoder(ChannelBasedDecoder):
     """
     Genetic CNN genome decoder with residual bit.
     """
-
-    def __init__(self, list_genome, channels):
+    def __init__(self, list_genome, channels, repeats=None):
         """
         Constructor.
         :param list_genome: list, genome describing the connections in a network.
         :param channels: list, list of tuples describing the channel size changes.
+        :param repeats: None | list, list of integers describing how many times to repeat each phase.
         """
-        super().__init__(list_genome, channels)
+        super().__init__(list_genome, channels, repeats=repeats)
 
         if self._model is not None:
             return  # Exit if the parent constructor set the model.
@@ -1067,7 +1113,7 @@ def demo():
     chopped = [gene[:-1] for gene in genome]
     make_dot_genome(chopped).view()
 
-    model = DenseGenomeDecoder(genome, channels).get_model()
+    model = ResidualGenomeDecoder(genome, channels, repeats=[1, 2, 3]).get_model()
     out = model(torch.autograd.Variable(data))
 
     make_dot_backprop(out).view()

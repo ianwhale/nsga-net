@@ -1,5 +1,6 @@
 # folders
-__pychache__/
+*__pychache__/
+.idea/
 
 # files
 *.pyc

@@ -1,7 +1,9 @@
 ﻿# NSGA-Net
 Code accompanying the paper. All codes assume running from root directory. 
 > [NSGA-Net: Neural Architecture Search using Multi-Objective Genetic Algorithm](https://arxiv.org/abs/1810.03522)
+>
 > Zhichao Lu, Ian Whalen, Vishnu Boddeti, Yashesh Dhebar, Kalyanmoy Deb, Erik Goodman and Wolfgang Banzhaf
+>
 > *arXiv:1810.03522*
 
 ![overview](https://github.com/ianwhale/nsga-net/blob/beta/img/overview_redraw.png  "Overview of NSGA-Net")

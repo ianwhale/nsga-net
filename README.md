@@ -8,7 +8,7 @@ Code accompanying the paper. All codes assume running from root directory.
 
 ![overview](https://github.com/ianwhale/nsga-net/blob/beta/img/overview_redraw.png  "Overview of NSGA-Net")
 
-### Pretrained models on CIFAR-10
+## Pretrained models on CIFAR-10
 The easist way to get started is to evaluate our pretrained NSGA-Net models.
 #### Micro search space ([NSGA-Net (6 @ 424)](https://drive.google.com/file/d/16v60Ex2C2ZNwCFACTEPZJrpVU9x5OWPj/view?usp=sharing))
 ![micro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/cells.png  "Normal&Reduction Cells")

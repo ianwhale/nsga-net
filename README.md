@@ -9,12 +9,12 @@ Code accompanying the paper. All codes assume running from root directory.
 ![overview](https://github.com/ianwhale/nsga-net/blob/beta/img/overview_redraw.png  "Overview of NSGA-Net")
 
 ## Requirements
-``` shell
+``` 
 Python >= 3.6.8, PyTorch >= 1.0.1.post2, torchvision >= 0.2.2
 ```
 
 ## Pretrained models on CIFAR-10
-The easist way to get started is to evaluate our pretrained NSGA-Net models.
+The easist way to get started is to evaluate our pretrained NSGA-Net models. 
 #### Micro search space ([NSGA-Net (6 @ 424)](https://drive.google.com/file/d/16v60Ex2C2ZNwCFACTEPZJrpVU9x5OWPj/view?usp=sharing))
 ![micro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/cells.png  "Normal&Reduction Cells")
 ``` shell
@@ -25,3 +25,17 @@ python micro_search_space/test.py --arch NSGANet --init_channels 34 --filter_inc
 #### Macro search space ()
 ![macro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/encoding.png  "architecture")
 
+
+## Citations
+If you find the code useful for your research, please consider citing our works
+``` 
+@article{nsganet,
+  title={NSGA-NET: a multi-objective genetic algorithm for neural architecture search},
+  author={Lu, Zhichao and Whalen, Ian and Boddeti, Vishnu and Dhebar, Yashesh and Deb, Kalyanmoy and Goodman, Erik and  Banzhaf, Wolfgang},
+  booktitle={GECCO-2019},
+  year={2018}
+}
+```
+
+## Acknowledgement 
+Code heavily inspired and modified from [pymoo](https://github.com/msu-coinlab/pymoo), [DARTS](https://github.com/quark0/darts#requirements) and [pytorch-cifar10](https://github.com/kuangliu/pytorch-cifar). 

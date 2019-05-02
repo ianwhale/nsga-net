@@ -25,6 +25,21 @@ python validation/test.py --net_type micro --arch NSGANet --init_channels 34 --f
 #### Macro search space ()
 ![macro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/encoding.png  "architecture")
 
+## Architecture validation
+To validate the results by training from scratch, run
+``` 
+# architecture found from macro search space
+python validation/train.py --net_type macro --cutout --batch_size 128 --epochs 350 
+# architecture found from micro search space
+python train.py --net_type micro --arch NSGANet --layers 20 --init_channels 34 --filter_increment 4  --cutout --auxiliary --batch_size 96 --droprate 0.2 --SE --epochs 600
+```
+You may need to adjust the batch_size depending on your GPU memory. 
+
+For customized macro search space architectures, change `genome` and `channels` option in `train.py`. 
+
+For customized micro search space architectures, specify your architecture in `models/micro_genotypes.py` and use `--arch` flag to pass the name. 
+
+More examples are provided in `scripts`.
 
 ## Citations
 If you find the code useful for your research, please consider citing our works

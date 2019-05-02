@@ -1,6 +1,9 @@
 '''Train CIFAR10 with PyTorch.'''
 from __future__ import print_function
 
+import sys
+sys.path.insert(0, 'nsga-net/')
+
 import torch
 import torch.nn as nn
 import torch.optim as optim

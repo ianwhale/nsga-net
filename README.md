@@ -31,7 +31,7 @@ To validate the results by training from scratch, run
 # architecture found from macro search space
 python validation/train.py --net_type macro --cutout --batch_size 128 --epochs 350 
 # architecture found from micro search space
-python train.py --net_type micro --arch NSGANet --layers 20 --init_channels 34 --filter_increment 4  --cutout --auxiliary --batch_size 96 --droprate 0.2 --SE --epochs 600
+python validation/train.py --net_type micro --arch NSGANet --layers 20 --init_channels 34 --filter_increment 4  --cutout --auxiliary --batch_size 96 --droprate 0.2 --SE --epochs 600
 ```
 You may need to adjust the batch_size depending on your GPU memory. 
 

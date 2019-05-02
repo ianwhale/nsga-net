@@ -41,6 +41,9 @@ For customized micro search space architectures, specify your architecture in `m
 
 More examples are provided in `scripts`.
 
+## Architecture search 
+I'll update this section later in the week. 
+
 ## Citations
 If you find the code useful for your research, please consider citing our works
 ``` 

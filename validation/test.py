@@ -1,6 +1,10 @@
 '''Inference CIFAR10 with PyTorch.'''
 from __future__ import print_function
 
+import sys
+# update your projecty root path before running
+sys.path.insert(0, 'path/to/nsga-net')
+
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
@@ -16,6 +20,7 @@ import numpy as np
 from validation import utils
 
 # model imports
+from models.macro_models import EvoNetwork
 import models.micro_genotypes as genotypes
 from models.micro_models import PyramidNetworkCIFAR as PyrmNASNet
 
@@ -36,6 +41,7 @@ parser.add_argument('--arch', type=str, default='NSGANet', help='which architect
 parser.add_argument('--filter_increment', default=4, type=int, help='# of filter increment')
 parser.add_argument('--SE', action='store_true', default=False, help='use Squeeze-and-Excitation')
 parser.add_argument('--model_path', type=str, default='EXP/model.pt', help='path of pretrained model')
+parser.add_argument('--net_type', type=str, default='micro', help='(options)micro, macro')
 
 args = parser.parse_args()
 
@@ -57,6 +63,10 @@ def main():
         logging.info('no gpu device available')
         sys.exit(1)
 
+    if args.auxiliary and args.net_type == 'macro':
+        logging.info('auxiliary head classifier not supported for macro search space models')
+        sys.exit(1)
+
     logging.info("args = %s", args)
 
     cudnn.enabled = True
@@ -75,11 +85,20 @@ def main():
     # classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Model
-    logging.info("==> Building NASNet search space encoded architectures")
-    genotype = eval("genotypes.%s" % args.arch)
-    net = PyrmNASNet(args.init_channels, num_classes=10, layers=args.layers,
-                     auxiliary=args.auxiliary, genotype=genotype,
-                     increment=args.filter_increment, SE=args.SE)
+    if args.net_type == 'micro':
+        logging.info("==> Building micro search space encoded architectures")
+        genotype = eval("genotypes.%s" % args.arch)
+        net = PyrmNASNet(args.init_channels, num_classes=10, layers=args.layers,
+                         auxiliary=args.auxiliary, genotype=genotype,
+                         increment=args.filter_increment, SE=args.SE)
+    elif args.net_type == 'macro':
+        genome = [[[1], [0, 0], [0, 1, 0], [0, 1, 1, 1], [1, 0, 0, 1, 1], [0]],
+                  [[0], [0, 0], [0, 1, 0], [0, 1, 0, 1], [1, 1, 1, 1, 1], [0]],
+                  [[0], [0, 1], [1, 0, 1], [1, 0, 1, 1], [1, 0, 0, 1, 1], [0]]]
+        channels = [(3, 128), (128, 128), (128, 128)]
+        net = EvoNetwork(genome, channels, 10, (32, 32), decoder='dense')
+    else:
+        raise NameError('Unknown network type, please only use supported network type')
 
     # logging.info("{}".format(net))
     logging.info("param size = %fMB", utils.count_parameters_in_MB(net))

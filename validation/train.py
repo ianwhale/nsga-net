@@ -2,7 +2,8 @@
 from __future__ import print_function
 
 import sys
-sys.path.insert(0, '/home/zhichao/nsga-net')
+# update your projecty root path before running
+sys.path.insert(0, 'path/to/nsga-net')
 
 import torch
 import torch.nn as nn
@@ -22,7 +23,7 @@ from validation import utils
 
 # model imports
 from models.macro_models import EvoNetwork
-from models import micro_genotypes as genotypes
+import models.micro_genotypes as genotypes
 from models.micro_models import PyramidNetworkCIFAR as PyrmNASNet
 
 

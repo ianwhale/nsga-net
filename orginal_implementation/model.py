@@ -40,13 +40,13 @@ class Model:
                 self.genome = pickle.load(f)
 
     def setup(self):
-        model = models.evonetwork.EvoNetwork(self.genome,
-                                             [(self.nchannels, self.nfilters),
+        model = models.macro_models.EvoNetwork(self.genome,
+                                               [(self.nchannels, self.nfilters),
                                               (self.nfilters, self.nfilters),
                                               (self.nfilters, self.nfilters)],
-                                             self.nclasses, (self.resolution_high,
+                                               self.nclasses, (self.resolution_high,
                                                              self.resolution_wide),
-                                             decoder="residual")
+                                               decoder="residual")
 
         data = torch.randn(16, self.nchannels, self.resolution_high, self.resolution_wide)
 

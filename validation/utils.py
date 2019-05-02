@@ -5,8 +5,6 @@ import shutil
 import torchvision.transforms as transforms
 from torch.autograd import Variable
 
-from autoaugment import CIFAR10Policy
-
 
 class AvgrageMeter(object):
     def __init__(self):
@@ -67,12 +65,8 @@ def _data_transforms_cifar10(args):
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
+        transforms.ToTensor()
     ])
-
-    if args.autoaugment:
-        train_transform.transforms.append(CIFAR10Policy())
-
-    train_transform.transforms.append(transforms.ToTensor())
 
     if args.cutout:
         train_transform.transforms.append(Cutout(args.cutout_length))

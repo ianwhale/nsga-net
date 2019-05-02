@@ -1,5 +1,5 @@
-from micro_search_space.NASNet_operations import *
-from micro_search_space.utils import drop_path
+from models.micro_operations import *
+from validation.utils import drop_path
 
 
 DEFAULT_PADDINGS = {
@@ -152,10 +152,7 @@ class NetworkCIFAR(nn.Module):
             else:
                 reduction = False
 
-            if SE:
-                cell = SECell(genotype, C_prev_prev, C_prev, C_curr, reduction, reduction_prev)
-            else:
-                cell = Cell(genotype, C_prev_prev, C_prev, C_curr, reduction, reduction_prev)
+            cell = Cell(genotype, C_prev_prev, C_prev, C_curr, reduction, reduction_prev, SE=SE)
 
             reduction_prev = reduction
             self.cells += [cell]
@@ -289,10 +286,8 @@ class NetworkImageNet(nn.Module):
 
 
 if __name__ == '__main__':
-    import utils
-    import numpy as np
-    import models.NASNet_genotypes as genotypes
-    # from flops_counter import add_flops_counting_methods
+    import validation.utils as utils
+    import models.micro_genotypes as genotypes
 
     genome = genotypes.NSGANet
     # model = AlterPyramidNetworkCIFAR(30, 10, 20, True, genome, 6, SE=False)
@@ -303,14 +298,3 @@ if __name__ == '__main__':
 
     # calculate number of trainable parameters
     print("param size = {}MB".format(utils.count_parameters_in_MB(model)))
-
-    # # calculate for flops
-    # net = add_flops_counting_methods(model)
-    # net.eval()
-    # net.start_flops_count()
-    # random_data = torch.randn(1, 3, 32, 32)
-    # net(torch.autograd.Variable(random_data))
-    # n_flops = np.round(net.compute_average_flops_cost() / 1e6, 4)
-    #
-    # print('flops = {}MB'.format(n_flops))
-

@@ -15,23 +15,24 @@ import logging
 import argparse
 import numpy as np
 
-from micro_search_space import utils
+from validation import utils
 
 # model imports
-from micro_search_space import NASNet_genotypes as genotypes
-from micro_search_space.NASNet_models import PyramidNetworkCIFAR as PyrmNASNet
+from models.macro_models import EvoNetwork
+from models import micro_genotypes as genotypes
+from models.micro_models import PyramidNetworkCIFAR as PyrmNASNet
 
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--data', type=str, default='../data', help='location of the data corpus')
-parser.add_argument('--batch_size', type=int, default=128, help='batch size')
+parser.add_argument('--batch_size', type=int, default=96, help='batch size')
 parser.add_argument('--learning_rate', type=float, default=0.025, help='init learning rate')
 parser.add_argument('--min_learning_rate', type=float, default=0.0, help='minimum learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
 parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
-parser.add_argument('--epochs', type=int, default=350, help='num of training epochs')
+parser.add_argument('--epochs', type=int, default=600, help='num of training epochs')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--save', type=str, default='EXP', help='experiment name')
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
@@ -41,10 +42,10 @@ parser.add_argument('--auxiliary_weight', type=float, default=0.4, help='weight 
 parser.add_argument('--layers', default=20, type=int, help='total number of layers (equivalent w/ N=6)')
 parser.add_argument('--droprate', default=0, type=float, help='dropout probability (default: 0.0)')
 parser.add_argument('--init_channels', type=int, default=32, help='num of init channels')
-parser.add_argument('--arch', type=str, default='DARTS', help='which architecture to use')
+parser.add_argument('--arch', type=str, default='NSGANet', help='which architecture to use')
 parser.add_argument('--filter_increment', default=4, type=int, help='# of filter increment')
 parser.add_argument('--SE', action='store_true', default=False, help='use Squeeze-and-Excitation')
-
+parser.add_argument('--net_type', type=str, default='micro', help='(options)micro, macro')
 args = parser.parse_args()
 
 args.save = 'train-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
@@ -63,6 +64,10 @@ logging.getLogger().addHandler(fh)
 def main():
     if not torch.cuda.is_available():
         logging.info('no gpu device available')
+        sys.exit(1)
+
+    if args.auxiliary and args.net_type == 'macro':
+        logging.info('auxiliary head classifier not supported for macro search space models')
         sys.exit(1)
 
     logging.info("args = %s", args)
@@ -89,11 +94,20 @@ def main():
     # classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Model
-    logging.info("==> Building NASNet search space encoded architectures")
-    genotype = eval("genotypes.%s" % args.arch)
-    net = PyrmNASNet(args.init_channels, num_classes=10, layers=args.layers,
-                     auxiliary=args.auxiliary, genotype=genotype,
-                     increment=args.filter_increment, SE=args.SE)
+    if args.net_type == 'micro':
+        logging.info("==> Building micro search space encoded architectures")
+        genotype = eval("genotypes.%s" % args.arch)
+        net = PyrmNASNet(args.init_channels, num_classes=10, layers=args.layers,
+                         auxiliary=args.auxiliary, genotype=genotype,
+                         increment=args.filter_increment, SE=args.SE)
+    elif args.net_type == 'macro':
+        genome = [[[1], [0, 0], [0, 1, 0], [0, 1, 1, 1], [1, 0, 0, 1, 1], [0]],
+                  [[0], [0, 0], [0, 1, 0], [0, 1, 0, 1], [1, 1, 1, 1, 1], [0]],
+                  [[0], [0, 1], [1, 0, 1], [1, 0, 1, 1], [1, 0, 0, 1, 1], [0]]]
+        channels = [(3, 128), (128, 128), (128, 128)]
+        net = EvoNetwork(genome, channels, 10, (32, 32), decoder='dense')
+    else:
+        raise NameError('Unknown network type, please only use supported network type')
 
     # logging.info("{}".format(net))
     logging.info("param size = %fMB", utils.count_parameters_in_MB(net))

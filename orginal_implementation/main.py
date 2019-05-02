@@ -83,5 +83,6 @@ def main():
     with open("output_file/output%d.pkl" % int(args.genome_id - 1), "wb") as f:
         pickle.dump(fitness, f)
 
+
 if __name__ == "__main__":
     main()

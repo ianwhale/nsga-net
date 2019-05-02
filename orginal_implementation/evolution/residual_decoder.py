@@ -195,6 +195,7 @@ class ResidualGenomePhase(nn.Module):
         """
         return self.processors[node_idx](torch.cat([outputs[i] for i in self.dependency_graph[node_idx]], dim=1))
 
+
 class ResidualGenomeNode(nn.Module):
     """
     Basic computation unit.

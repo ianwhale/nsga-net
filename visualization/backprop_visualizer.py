@@ -2,7 +2,7 @@
 # Code copied from: https://github.com/szagoruyko/functional-zoo/blob/master/visualize.py
 # This is used for debugging.
 
-from models.evonetwork import EvoNetwork
+from models.macro_models import EvoNetwork
 from graphviz import Digraph
 import torch
 from torch.autograd import Variable

@@ -29,7 +29,7 @@ def get_torch_model_output(genome,seed):
     # print(channels)
     out_features = 1
     data = torch.randn(1, 3, 32, 32)
-    net = models.evonetwork.EvoNetwork(genome, channels, out_features, (32, 32))
+    net = models.macro_models.EvoNetwork(genome, channels, out_features, (32, 32))
     net.apply(weights_init)
     return net(torch.autograd.Variable(data))
 

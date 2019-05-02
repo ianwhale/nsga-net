@@ -13,11 +13,11 @@ import logging
 import argparse
 import numpy as np
 
-from micro_search_space import utils
+from validation import utils
 
 # model imports
-import micro_search_space.NASNet_genotypes as genotypes
-from micro_search_space.NASNet_models import PyramidNetworkCIFAR as PyrmNASNet
+import models.micro_genotypes as genotypes
+from models.micro_models import PyramidNetworkCIFAR as PyrmNASNet
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Testing')
 parser.add_argument('--seed', type=int, default=0, help='random seed')

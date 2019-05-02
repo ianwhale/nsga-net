@@ -15,15 +15,20 @@ Python >= 3.6.8, PyTorch >= 1.0.1.post2, torchvision >= 0.2.2
 
 ## Pretrained models on CIFAR-10
 The easist way to get started is to evaluate our pretrained NSGA-Net models. 
+
+#### Macro search space ([NSGA-Net-macro](https://drive.google.com/file/d/173_CXA_YbEjg1_Lnfg6vqweTRDiuDi0J/view?usp=sharing))
+![macro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/encoding.png  "architecture")
+``` shell
+python validation/test.py --net_type macro --model_path weights.pt
+```
+- Expected result: *3.73%* test error rate with *3.37M* model parameters, *1240M* Multiply-Adds.
+
 #### Micro search space ([NSGA-Net (6 @ 424)](https://drive.google.com/file/d/16v60Ex2C2ZNwCFACTEPZJrpVU9x5OWPj/view?usp=sharing))
 ![micro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/cells.png  "Normal&Reduction Cells")
 ``` shell
 python validation/test.py --net_type micro --arch NSGANet --init_channels 34 --filter_increment 4 --SE --auxiliary --model_path weights.pt
 ```
 - Expected result: *2.62%* test error rate with *2.42M* model parameters, *550M* Multiply-Adds.
-
-#### Macro search space ()
-![macro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/encoding.png  "architecture")
 
 ## Architecture validation
 To validate the results by training from scratch, run

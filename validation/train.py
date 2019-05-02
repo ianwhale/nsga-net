@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 import sys
-sys.path.insert(0, 'nsga-net/')
+sys.path.insert(0, '/home/zhichao/nsga-net')
 
 import torch
 import torch.nn as nn

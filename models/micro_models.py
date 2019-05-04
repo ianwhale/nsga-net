@@ -1,5 +1,5 @@
 from models.micro_operations import *
-from validation.utils import drop_path
+from misc.utils import drop_path
 
 
 DEFAULT_PADDINGS = {

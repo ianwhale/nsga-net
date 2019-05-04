@@ -1,8 +1,11 @@
 # evo_visualizer.py
+import sys
+# sys.path.insert(0, '/path/to/nsga-net')
+sys.path.insert(0, '/Users/zhichao.lu/Dropbox/2019/github/nsga-net')
 
 from graphviz import Digraph
-from string import ascii_letters
-from evolution.residual_decoder import ResidualGenomePhase
+from models.macro_decoder import ResidualPhase
+from models import macro_genotypes as genotypes
 
 
 def get_graph_function(type):
@@ -12,9 +15,10 @@ def get_graph_function(type):
     :return: callable
     """
     if type == "residual":
-        return ResidualGenomePhase.build_dependency_graph
+        return ResidualPhase.build_dependency_graph
 
     raise NotImplementedError("Genome type {} not supported.".format(type))
+
 
 def make_dot_phase(phase, rankdir="UD", format="pdf", title=None, filename="genome", type="residual"):
     """
@@ -80,6 +84,7 @@ def make_dot_phase(phase, rankdir="UD", format="pdf", title=None, filename="geno
     dot.attr(dpi="300")
 
     return dot
+
 
 def make_dot_genome(genome, rankdir="UD", format="pdf", title=None, filename="genome", type="residual"):
     """
@@ -215,4 +220,11 @@ def demo():
 
 
 if __name__ == "__main__":
-    demo()
+    genotype_name = sys.argv[1]
+    try:
+        genotype = eval('genotypes.{}'.format(genotype_name))
+    except AttributeError:
+        print("{} is not specified in genotypes.py".format(genotype_name))
+        sys.exit(1)
+    d = make_dot_genome(genotype, title="{}".format(genotype_name), filename="macro_network")
+    d.view()

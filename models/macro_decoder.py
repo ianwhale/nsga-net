@@ -61,7 +61,7 @@ class ChannelBasedDecoder(Decoder):
         if not self._genome:
             self._model = Identity()
 
-        print(list_genome)
+        # print(list_genome)
 
     def adjust_for_repeats(self, repeats):
         """

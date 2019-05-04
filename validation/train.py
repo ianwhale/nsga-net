@@ -19,9 +19,10 @@ import logging
 import argparse
 import numpy as np
 
-from validation import utils
+from misc import utils
 
 # model imports
+from models import macro_genotypes
 from models.macro_models import EvoNetwork
 import models.micro_genotypes as genotypes
 from models.micro_models import PyramidNetworkCIFAR as PyrmNASNet
@@ -105,9 +106,7 @@ def main():
                          auxiliary=args.auxiliary, genotype=genotype,
                          increment=args.filter_increment, SE=args.SE)
     elif args.net_type == 'macro':
-        genome = [[[1], [0, 0], [0, 1, 0], [0, 1, 1, 1], [1, 0, 0, 1, 1], [0]],
-                  [[0], [0, 0], [0, 1, 0], [0, 1, 0, 1], [1, 1, 1, 1, 1], [0]],
-                  [[0], [0, 1], [1, 0, 1], [1, 0, 1, 1], [1, 0, 0, 1, 1], [0]]]
+        genome = eval("macro_genotypes.%s" % args.arch)
         channels = [(3, 128), (128, 128), (128, 128)]
         net = EvoNetwork(genome, channels, 10, (32, 32), decoder='dense')
     else:

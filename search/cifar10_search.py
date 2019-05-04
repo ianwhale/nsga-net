@@ -1,14 +1,65 @@
+from __future__ import print_function
 from PIL import Image
 import os
 import os.path
 import numpy as np
 import sys
-import pickle
+if sys.version_info[0] == 2:
+    import cPickle as pickle
+else:
+    import pickle
+
 import torch.utils.data as data
-from torchvision.datasets.utils import download_url, check_integrity
+# from .utils import download_url, check_integrity
+
+import errno
+import hashlib
 
 
-class MYCIFAR10(data.Dataset):
+def check_integrity(fpath, md5):
+    if not os.path.isfile(fpath):
+        return False
+    md5o = hashlib.md5()
+    with open(fpath, 'rb') as f:
+        # read in 1MB chunks
+        for chunk in iter(lambda: f.read(1024 * 1024), b''):
+            md5o.update(chunk)
+    md5c = md5o.hexdigest()
+    if md5c != md5:
+        return False
+    return True
+
+
+def download_url(url, root, filename, md5):
+    from six.moves import urllib
+
+    root = os.path.expanduser(root)
+    fpath = os.path.join(root, filename)
+
+    try:
+        os.makedirs(root)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            pass
+        else:
+            raise
+
+    # downloads file
+    if os.path.isfile(fpath) and check_integrity(fpath, md5):
+        print('Using downloaded and verified file: ' + fpath)
+    else:
+        try:
+            print('Downloading ' + url + ' to ' + fpath)
+            urllib.request.urlretrieve(url, fpath)
+        except:
+            if url[:5] == 'https':
+                url = url.replace('https:', 'http:')
+                print('Failed download. Trying https -> http instead.'
+                      ' Downloading ' + url + ' to ' + fpath)
+                urllib.request.urlretrieve(url, fpath)
+
+
+class CIFAR10(data.Dataset):
     """`CIFAR10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
 
     Args:
@@ -34,13 +85,16 @@ class MYCIFAR10(data.Dataset):
         ['data_batch_2', 'd4bba439e000b95fd0a9bffe97cbabec'],
         ['data_batch_3', '54ebc095f3ab1f0389bbae665268c751'],
         ['data_batch_4', '634d18415352ddfa80567beed471001a'],
-        # ['data_batch_5', '482c414d41f54cd18b22e5b47cb7c3cb'],
     ]
 
     test_list = [
-        # ['test_batch', '40351d587109b95175f43aff81a1287e'],
         ['data_batch_5', '482c414d41f54cd18b22e5b47cb7c3cb'],
     ]
+
+    # original cifar 10 test set
+    # test_list = [
+    #     ['test_batch', '40351d587109b95175f43aff81a1287e'],
+    # ]
 
     def __init__(self, root, train=True,
                  transform=None, target_transform=None,
@@ -65,7 +119,10 @@ class MYCIFAR10(data.Dataset):
                 f = fentry[0]
                 file = os.path.join(self.root, self.base_folder, f)
                 fo = open(file, 'rb')
-                entry = pickle.load(fo, encoding='latin1')
+                if sys.version_info[0] == 2:
+                    entry = pickle.load(fo)
+                else:
+                    entry = pickle.load(fo, encoding='latin1')
                 self.train_data.append(entry['data'])
                 if 'labels' in entry:
                     self.train_labels += entry['labels']
@@ -74,7 +131,6 @@ class MYCIFAR10(data.Dataset):
                 fo.close()
 
             self.train_data = np.concatenate(self.train_data)
-            # self.train_data = self.train_data.reshape((50000, 3, 32, 32))
             self.train_data = self.train_data.reshape((40000, 3, 32, 32))
             self.train_data = self.train_data.transpose((0, 2, 3, 1))  # convert to HWC
         else:
@@ -165,19 +221,5 @@ class MYCIFAR10(data.Dataset):
         return fmt_str
 
 
-class CIFAR100(MYCIFAR10):
-    """`CIFAR100 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
-
-    This is a subclass of the `CIFAR10` Dataset.
-    """
-    base_folder = 'cifar-100-python'
-    url = "https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz"
-    filename = "cifar-100-python.tar.gz"
-    tgz_md5 = 'eb9058c3a382ffc7106e4002c42a8d85'
-    train_list = [
-        ['train', '16019d7e3df5f24257cddd939b257f8d'],
-    ]
-
-    test_list = [
-        ['test', 'f0ef6b0ae62326f3e7ffdfab6717acfc'],
-    ]
+if __name__ == '__main__':
+    data = CIFAR10(root='../data', train=True, download=True)

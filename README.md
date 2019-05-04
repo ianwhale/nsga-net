@@ -44,10 +44,23 @@ For customized macro search space architectures, change `genome` and `channels` 
 
 For customized micro search space architectures, specify your architecture in `models/micro_genotypes.py` and use `--arch` flag to pass the name. 
 
-More examples are provided in `scripts`.
 
 ## Architecture search 
-I'll update this section later in the week. 
+To run architecture search:
+``` shell
+# macro search space
+python search/evolution_search.py --search_space macro --init_channels 32
+# micro search space
+python search/evolution_search.py --search_space micro
+```
+
+## Visualization
+To visualize the architectures:
+``` shell
+python visualization/macro_visualize.py NSGANet            # macro search space architectures
+python visualization/micro_visualize.py NSGANet            # micro search space architectures
+```
+For customized architecture, first define the architecture in `models/*_genotypes.py`, then substitute `NSGANet` with the name of your customized architecture. 
 
 ## Citations
 If you find the code useful for your research, please consider citing our works

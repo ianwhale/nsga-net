@@ -53,6 +53,9 @@ python search/evolution_search.py --search_space macro --init_channels 32
 # micro search space
 python search/evolution_search.py --search_space micro
 ```
+Pareto Front               |  Normal Cell              | Reduction Cell
+:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/ianwhale/nsga-net/blob/beta/img/pf_micro.gif)  |  ![](https://github.com/ianwhale/nsga-net/blob/beta/img/nd_normal_cell.gif)  |  ![](https://github.com/ianwhale/nsga-net/blob/beta/img/nd_reduce_cell.gif)
 
 ## Visualization
 To visualize the architectures:

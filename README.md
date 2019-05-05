@@ -57,6 +57,8 @@ Pareto Front               |  Normal Cell              | Reduction Cell
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](https://github.com/ianwhale/nsga-net/blob/beta/img/pf_micro.gif)  |  ![](https://github.com/ianwhale/nsga-net/blob/beta/img/nd_normal_cell.gif)  |  ![](https://github.com/ianwhale/nsga-net/blob/beta/img/nd_reduce_cell.gif)
 
+If you would like to run asynchronous and parallelize each architecture's back-propagation training, set `--n_offspring` to `1`. The algorithm will run in *steady-state* mode, in which the population is updated as soon as one new architecture candidate is evaludated. It works reasonably well in single-objective case, a similar strategy is used in [here](https://arxiv.org/abs/1802.01548).  
+
 ## Visualization
 To visualize the architectures:
 ``` shell

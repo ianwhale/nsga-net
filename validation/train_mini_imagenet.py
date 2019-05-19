@@ -121,6 +121,7 @@ def main():
     # partition the train set for validation
     num_train = len(train_data)
     indices = list(range(num_train))
+    np.random.shuffle(indices)
     split = int(np.floor(train_portion * num_train))
 
     train_queue = torch.utils.data.DataLoader(

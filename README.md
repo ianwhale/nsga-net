@@ -49,9 +49,9 @@ For customized micro search space architectures, specify your architecture in `m
 To run architecture search:
 ``` shell
 # macro search space
-python search/evolution_search.py --search_space macro --init_channels 32
+python search/evolution_search.py --search_space macro --init_channels 32 --n_gens 30
 # micro search space
-python search/evolution_search.py --search_space micro
+python search/evolution_search.py --search_space micro --init_channels 16 --layers 8 --epochs 20 --n_offspring 20 --n_gens 30
 ```
 Pareto Front               |  Network                  
 :-------------------------:|:-------------------------:

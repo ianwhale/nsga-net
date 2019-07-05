@@ -91,12 +91,28 @@ parser.add_argument('--save', type=str, default='EXP',
                     help='experiment name')
 parser.add_argument('--droprate', default=0, type=float, help='dropout probability (default: 0.0)')
 parser.add_argument('--auxiliary', action='store_true', default=False, help='use auxiliary tower')
-parser.add_argument('--auxiliary_weight', type=float, default=0.4, help='weight for auxiliary loss')
+parser.add_argument('--auxiliary-weight', type=float, default=0.4, help='weight for auxiliary loss')
+parser.add_argument('--label-smooth', type=float, default=0.1, help='label smoothing')
 
 best_acc1 = 0
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format=log_format, datefmt='%m/%d %I:%M:%S %p')
+
+
+class CrossEntropyLabelSmooth(nn.Module):
+    def __init__(self, num_classes, epsilon):
+        super(CrossEntropyLabelSmooth, self).__init__()
+        self.num_classes = num_classes
+        self.epsilon = epsilon
+        self.logsoftmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, inputs, targets):
+        log_probs = self.logsoftmax(inputs)
+        targets = torch.zeros_like(log_probs).scatter_(1, targets.unsqueeze(1), 1)
+        targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+        loss = (-targets * log_probs).mean(0).sum()
+        return loss
 
 
 def main():
@@ -201,12 +217,14 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
+    criterion_smooth = CrossEntropyLabelSmooth(1000, args.label_smooth).cuda(args.gpu)
 
     parameters = filter(lambda p: p.requires_grad, model.parameters())
 
     optimizer = torch.optim.SGD(parameters, args.lr,
                                 momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+                                weight_decay=args.weight_decay,
+                                nesterov=True)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -277,7 +295,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
         # train for one epoch
         # train(train_loader, model, criterion, optimizer, epoch, args)
-        trn_acc, _ = train(train_loader, model, criterion, optimizer, epoch, args)
+        # trn_acc, _ = train(train_loader, model, criterion, optimizer, epoch, args)
+        trn_acc, _ = train(train_loader, model, criterion_smooth, optimizer, epoch, args)  # use label smoothing
         logging.info('train_acc %f', trn_acc)
 
         # evaluate on validation set
@@ -321,8 +340,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output, _ = model(images)  # for models using auxiliary classifier
+        output, output_aux = model(images)  # for models using auxiliary classifier
         loss = criterion(output, target)
+
+        if args.auxiliary:
+            loss_aux = criterion(output_aux, target)
+            loss += args.auxiliary_weight * loss_aux
 
         # measure accuracy and record loss
         acc1, acc5 = accuracy(output, target, topk=(1, 5))

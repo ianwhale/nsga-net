@@ -226,6 +226,8 @@ def main_worker(gpu, ngpus_per_node, args):
                                 weight_decay=args.weight_decay,
                                 nesterov=True)
 
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
+
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
@@ -286,12 +288,13 @@ def main_worker(gpu, ngpus_per_node, args):
 
     for epoch in range(args.start_epoch, args.epochs):
         logging.info('epoch %d', epoch)
+        scheduler.step()
 
         model.droprate = args.droprate * epoch / args.epochs
 
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
+        adjust_learning_rate(optimizer, epoch, args, scheduler.get_lr()[0])
 
         # train for one epoch
         # train(train_loader, model, criterion, optimizer, epoch, args)
@@ -461,9 +464,10 @@ class ProgressMeter(object):
         return '[' + fmt + '/' + fmt.format(num_batches) + ']'
 
 
-def adjust_learning_rate(optimizer, epoch, args):
-    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 30))
+def adjust_learning_rate(optimizer, epoch, args, lr=None):
+    if lr is None:
+        """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+        lr = args.lr * (0.1 ** (epoch // 30))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 

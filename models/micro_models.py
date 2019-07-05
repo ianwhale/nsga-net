@@ -230,7 +230,7 @@ class PyramidNetworkCIFAR(nn.Module):
 
 class NetworkImageNet(nn.Module):
 
-    def __init__(self, C, num_classes, layers, auxiliary, genotype):
+    def __init__(self, C, num_classes, layers, auxiliary, genotype, SE=False):
         super(NetworkImageNet, self).__init__()
         self._layers = layers
         self._auxiliary = auxiliary
@@ -259,7 +259,7 @@ class NetworkImageNet(nn.Module):
                 reduction = True
             else:
                 reduction = False
-            cell = Cell(genotype, C_prev_prev, C_prev, C_curr, reduction, reduction_prev)
+            cell = Cell(genotype, C_prev_prev, C_prev, C_curr, reduction, reduction_prev, SE=SE)
             reduction_prev = reduction
             self.cells += [cell]
             C_prev_prev, C_prev = C_prev, cell.multiplier * C_curr
@@ -373,7 +373,8 @@ if __name__ == '__main__':
     # model = PyramidNetworkCIFAR(48, 10, 20, True, genome, 22, SE=True)
     # model = NetworkCIFAR(34, 10, 20, True, genome, SE=True)
     # model = GradPyramidNetworkCIFAR(34, 10, 20, True, genome, 4)
-    model = NetworkMiniImageNet(32, 100, 20, True, genome, True)
+    # model = NetworkMiniImageNet(32, 100, 20, True, genome, True)
+    model = NetworkImageNet(46, 1000, 14, True, genome, SE=True)
     model.droprate = 0.0
 
     # calculate number of trainable parameters
@@ -383,7 +384,7 @@ if __name__ == '__main__':
     net = add_flops_counting_methods(model)
     net.eval()
     net.start_flops_count()
-    random_data = torch.randn(1, 3, 84, 84)
+    random_data = torch.randn(1, 3, 224, 224)
     net(torch.autograd.Variable(random_data))
     n_flops = np.round(net.compute_average_flops_cost() / 1e6, 4)
 

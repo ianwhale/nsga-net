@@ -1,8 +1,12 @@
 # copied from pytorch example
 # https://raw.githubusercontent.com/pytorch/examples/master/imagenet/main.py
 
-import os
 import sys
+# update your projecty root path before running
+sys.path.insert(0, '/user/luzhicha/nsga-net')
+
+import os
+# import sys
 import time
 import random
 import shutil

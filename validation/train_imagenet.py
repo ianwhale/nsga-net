@@ -1,10 +1,13 @@
-import os
 import sys
+# update your projecty root path before running
+sys.path.insert(0, '/user/luzhicha/nsga-net')
+
+import os
+# import sys
 import numpy as np
 import time
 
 import glob
-import random
 import logging
 import argparse
 

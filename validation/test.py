@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import sys
 # update your projecty root path before running
-sys.path.insert(0, 'path/to/nsga-net')
+sys.path.insert(0, '/home/zhichao/Dropbox/2019/github/nsga-net')
 
 import torch
 import torch.nn as nn
@@ -18,12 +18,14 @@ import argparse
 import numpy as np
 
 from misc import utils
+from misc.flops_counter import add_flops_counting_methods
 
 # model imports
 from models import macro_genotypes
 from models.macro_models import EvoNetwork
 import models.micro_genotypes as genotypes
 from models.micro_models import PyramidNetworkCIFAR as PyrmNASNet
+from models.micro_models import NetworkCIFAR as NASNet
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Testing')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
@@ -39,7 +41,7 @@ parser.add_argument('--layers', default=20, type=int, help='total number of laye
 parser.add_argument('--droprate', default=0, type=float, help='dropout probability (default: 0.0)')
 parser.add_argument('--init_channels', type=int, default=32, help='num of init channels')
 parser.add_argument('--arch', type=str, default='NSGANet', help='which architecture to use')
-parser.add_argument('--filter_increment', default=4, type=int, help='# of filter increment')
+parser.add_argument('--filter_increment', default=-1, type=int, help='# of filter increment')
 parser.add_argument('--SE', action='store_true', default=False, help='use Squeeze-and-Excitation')
 parser.add_argument('--model_path', type=str, default='EXP/model.pt', help='path of pretrained model')
 parser.add_argument('--net_type', type=str, default='micro', help='(options)micro, macro')
@@ -89,9 +91,13 @@ def main():
     if args.net_type == 'micro':
         logging.info("==> Building micro search space encoded architectures")
         genotype = eval("genotypes.%s" % args.arch)
-        net = PyrmNASNet(args.init_channels, num_classes=10, layers=args.layers,
-                         auxiliary=args.auxiliary, genotype=genotype,
-                         increment=args.filter_increment, SE=args.SE)
+        if args.filter_increment > 0:
+            net = PyrmNASNet(args.init_channels, num_classes=10, layers=args.layers,
+                             auxiliary=args.auxiliary, genotype=genotype,
+                             increment=args.filter_increment, SE=args.SE)
+        else:
+            net = NASNet(args.init_channels, num_classes=10, layers=args.layers,
+                         auxiliary=args.auxiliary, genotype=genotype, SE=args.SE)
     elif args.net_type == 'macro':
         genome = eval("macro_genotypes.%s" % args.arch)
         channels = [(3, 128), (128, 128), (128, 128)]
@@ -112,6 +118,16 @@ def main():
 
     # inference on original CIFAR-10 test images
     infer(valid_queue, net, criterion)
+
+    # calculate for flops
+    net = add_flops_counting_methods(net)
+    net.eval()
+    net.start_flops_count()
+    random_data = torch.randn(1, 3, 32, 32)
+    net(random_data.to(device))
+    n_flops = np.round(net.compute_average_flops_cost() / 1e6, 4)
+
+    print('flops = {}MB'.format(n_flops))
 
 
 def infer(valid_queue, net, criterion):

@@ -4,6 +4,7 @@ results/
 ipynb/
 *.pdf
 *.xlsx
+pre_trained_models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

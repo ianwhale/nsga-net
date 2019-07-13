@@ -13,8 +13,11 @@ Code accompanying the paper. All codes assume running from root directory. Pleas
 Python >= 3.6.8, PyTorch >= 1.0.1.post2, torchvision >= 0.2.2
 ```
 
+## Results on CIFAR-10
+![cifar10_pareto](https://github.com/ianwhale/nsga-net/blob/beta/img/cifar10.png  "cifar10")
+
 ## Pretrained models on CIFAR-10
-The easist way to get started is to evaluate our pretrained NSGA-Net models. 
+The easiest way to get started is to evaluate our pretrained NSGA-Net models.
 
 #### Macro search space ([NSGA-Net-macro](https://drive.google.com/file/d/173_CXA_YbEjg1_Lnfg6vqweTRDiuDi0J/view?usp=sharing))
 ![macro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/encoding.png  "architecture")

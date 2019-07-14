@@ -14,7 +14,7 @@ Python >= 3.6.8, PyTorch >= 1.0.1.post2, torchvision >= 0.2.2, pymoo >= 0.3.1.de
 ```
 
 ## Results on CIFAR-10
-![cifar10_pareto](https://github.com/ianwhale/nsga-net/blob/beta/img/cifar10.png  "cifar10")
+![cifar10_pareto](https://github.com/ianwhale/nsga-net/blob/master/img/cifar10.png  "cifar10")
 
 ## Pretrained models on CIFAR-10
 The easiest way to get started is to evaluate our pretrained NSGA-Net models.
@@ -26,12 +26,28 @@ python validation/test.py --net_type macro --model_path weights.pt
 ```
 - Expected result: *3.73%* test error rate with *3.37M* model parameters, *1240M* Multiply-Adds.
 
-#### Micro search space ([NSGA-Net (6 @ 424)](https://drive.google.com/file/d/16v60Ex2C2ZNwCFACTEPZJrpVU9x5OWPj/view?usp=sharing))
+#### Micro search space
 ![micro_architecture](https://github.com/ianwhale/nsga-net/blob/beta/img/cells.png  "Normal&Reduction Cells")
 ``` shell
-python validation/test.py --net_type micro --arch NSGANet --init_channels 34 --filter_increment 4 --SE --auxiliary --model_path weights.pt
+python validation/test.py --net_type micro --arch NSGANet --init_channels 26 --filter_increment 4 --SE --auxiliary --model_path weights.pt
 ```
-- Expected result: *2.62%* test error rate with *2.42M* model parameters, *550M* Multiply-Adds.
+- Expected result: *2.43%* test error rate with *1.97M* model parameters, *417M* Multiply-Adds ([*weights.pt*](https://drive.google.com/open?id=1JvMkT1eo6JegtUvT-5qY4LK3xgq-k-OH)). 
+
+``` shell
+python validation/test.py --net_type micro --arch NSGANet --init_channels 34 --filter_increment 4 --auxiliary --model_path weights.pt
+```
+- Expected result: *2.22%* test error rate with *2.20M* model parameters, *550M* Multiply-Adds ([*weights.pt*](https://drive.google.com/open?id=1it_aFoez-U7SkxSuRPYWDVFg8kZwE7E7)). 
+
+``` shell
+python validation/test.py --net_type micro --arch NSGANet --init_channels 36 --filter_increment 6 --SE --auxiliary --model_path weights.pt
+```
+- Expected result: *2.02%* test error rate with *4.05M* model parameters, *817M* Multiply-Adds ([*weights.pt*](https://drive.google.com/open?id=1kLXzKxQ7dazjmANTvgSoeMPHWwYKiOtm)). 
+
+## Pretrained models on CIFAR-100
+``` shell
+python validation/test.py --task cifar100 --net_type micro --arch NSGANet --init_channels 36 --filter_increment 6 --SE --auxiliary --model_path weights.pt
+```
+- Expected result: *14.42%* test error rate with *4.1M* model parameters, *817M* Multiply-Adds ([*weights.pt*](https://drive.google.com/open?id=1CMtSg1l2V5p0HcRxtBsD8syayTtS9QAu)). 
 
 ## Architecture validation
 To validate the results by training from scratch, run

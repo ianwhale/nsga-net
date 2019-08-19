@@ -10,7 +10,7 @@ Code accompanying the paper. All codes assume running from root directory. Pleas
 
 ## Requirements
 ``` 
-Python >= 3.6.8, PyTorch >= 1.0.1.post2, torchvision >= 0.2.2, pymoo >= 0.3.1.dev0
+Python >= 3.6.8, PyTorch >= 1.0.1.post2, torchvision >= 0.2.2, pymoo == 0.3.0
 ```
 
 ## Results on CIFAR-10
